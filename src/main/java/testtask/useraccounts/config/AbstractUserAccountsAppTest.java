@@ -14,12 +14,13 @@ public abstract class AbstractUserAccountsAppTest extends AbstractSeleniumTest {
     protected UserAccountsPage userAccountsPage;
     private static final String APPLICATION_URL = "http://borisborisov.bg/user-accounts/";
 
-    private List<String> accountsToBeDeleted = new ArrayList<>();
+    private List<String> accountsToBeDeleted;
 
     @Before
     public final void setUpUserAccountsApp() {
         // initialize page object(s) to be tested
         userAccountsPage = new UserAccountsPage(getWebDriver());
+        accountsToBeDeleted = new ArrayList<>();
     }
 
     protected void requestUserAccountsApplication() {
