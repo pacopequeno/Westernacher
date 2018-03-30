@@ -2,25 +2,18 @@ package testtask.useraccounts.config;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
-import org.junit.rules.TestRule;
-import org.openqa.selenium.Cookie;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.UnableToSetCookieException;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.*;
 import org.openqa.selenium.logging.LogEntries;
 import org.openqa.selenium.logging.LogEntry;
 import org.openqa.selenium.logging.LogType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestContextManager;
-import testtask.useraccounts.page.UserAccountsPage;
 import testtask.useraccounts.webdriver.WebDriverBuilder;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.List;
 
 /**
  * Base class which provides essential functionality for selenium tests.
@@ -30,14 +23,7 @@ public abstract class AbstractSeleniumTest {
 
     protected static final Logger LOG = LoggerFactory.getLogger(AbstractSeleniumTest.class);
 
-    @Autowired
-    private TestEnvironmentConfig config;
     private WebDriver webDriver;
-
-    @Rule
-    public TestRule webDriverRules;
-
-    protected UserAccountsPage userAccountsPage;
 
     protected AbstractSeleniumTest() {
         // preparation of TestContextManager must be ran first to initialize Autowired fields
@@ -52,9 +38,6 @@ public abstract class AbstractSeleniumTest {
     public final void setUp() {
         // initialize webdriver instance
         webDriver = new WebDriverBuilder().createWebDriver();
-
-        // initialize page object to be tested
-        userAccountsPage = new UserAccountsPage(getWebDriver(), config);
     }
 
     @After
@@ -62,9 +45,12 @@ public abstract class AbstractSeleniumTest {
         // optional for debugging:
         // printBrowserConsoleLog();
 
+        // kill webdriver instance
         if (webDriver != null) {
             webDriver.quit();
         }
+
+        LOG.info("Successful test run :)");
     }
 
     protected WebDriver getWebDriver() {
@@ -84,27 +70,15 @@ public abstract class AbstractSeleniumTest {
         System.out.println("***** END OF BROWSER CONSOLE LOG ***\n");
     }
 
-    protected void setCookie(final String identifier, final String name, final String value, final String domain, final String path, final Date expiryDate) {
-        final Cookie cookie = new Cookie(name, value, domain, path, expiryDate);
-        try {
-            webDriver.manage().addCookie(cookie);
-            LOG.info(identifier + " has been set via addCookie(): " + cookie);
-        } catch(UnableToSetCookieException e) {
-            ((JavascriptExecutor) webDriver).executeScript("document.cookie = '" + cookie + "'");
-            LOG.info(identifier + " has been set via executeScript(): " + cookie);
-        }
+    protected WebElement findElementById(final String id) {
+        return findElementWithCss("[id = '" + id + "']");
     }
 
-    protected void waitASecond(final int seconds) {
-        final int millis = seconds * 1000;
-        waitAMilliSecond(millis);
+    protected WebElement findElementWithCss(final String cssLocator) {
+        return getWebDriver().findElement(By.cssSelector(cssLocator));
     }
 
-    protected void waitAMilliSecond(final int milliSeconds) {
-        try {
-            Thread.sleep(milliSeconds);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    protected List<WebElement> findElementsWithCss(final String cssLocator) {
+        return getWebDriver().findElements(By.cssSelector(cssLocator));
     }
 }
