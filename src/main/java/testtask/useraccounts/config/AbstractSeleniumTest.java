@@ -13,7 +13,6 @@ import org.springframework.test.context.TestContextManager;
 import testtask.useraccounts.webdriver.WebDriverBuilder;
 
 import java.text.SimpleDateFormat;
-import java.util.List;
 
 /**
  * Base class which provides essential functionality for selenium tests.
@@ -58,27 +57,15 @@ public abstract class AbstractSeleniumTest {
     }
 
     public void printBrowserConsoleLog() {
-        System.out.println("\n****** BROWSER CONSOLE LOG ***");
+        LOG.info("\n****** BROWSER CONSOLE LOG ***");
         final LogEntries logEntries = webDriver.manage().logs().get(LogType.BROWSER);
         for (final LogEntry entry : logEntries) {
             if (entry.getLevel().toString().equals("SEVERE")) { // possible types: "OFF", "SEVERE", "WARNING", "INFO", "DEBUG", "ALL"
-                System.err.println(new SimpleDateFormat("HH:mm:ss").format(entry.getTimestamp()) + " - " + entry.getLevel() + ": " + entry.getMessage());
+                LOG.error(new SimpleDateFormat("HH:mm:ss").format(entry.getTimestamp()) + " - " + entry.getLevel() + ": " + entry.getMessage());
             } else {
-                System.out.println(new SimpleDateFormat("HH:mm:ss").format(entry.getTimestamp()) + " - " + entry.getLevel() + ": " + entry.getMessage());
+                LOG.info(new SimpleDateFormat("HH:mm:ss").format(entry.getTimestamp()) + " - " + entry.getLevel() + ": " + entry.getMessage());
             }
         }
-        System.out.println("***** END OF BROWSER CONSOLE LOG ***\n");
-    }
-
-    protected WebElement findElementById(final String id) {
-        return findElementWithCss("[id = '" + id + "']");
-    }
-
-    protected WebElement findElementWithCss(final String cssLocator) {
-        return getWebDriver().findElement(By.cssSelector(cssLocator));
-    }
-
-    protected List<WebElement> findElementsWithCss(final String cssLocator) {
-        return getWebDriver().findElements(By.cssSelector(cssLocator));
+        LOG.info("***** END OF BROWSER CONSOLE LOG ***\n");
     }
 }

@@ -1,9 +1,10 @@
 package testtask.useraccounts.page;
 
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+
+import java.util.List;
 
 public class UserAccountsPage extends AbstractPage {
 
@@ -37,13 +38,28 @@ public class UserAccountsPage extends AbstractPage {
         return getTextFromWebElement(headline);
     }
 
-    public void searchTableForString(final String searchString) {
+    public boolean isUserAccountsTableEmpty() {
+        return getAllUserAccountsTableRows().get(0).getText().equals("User Accounts Table Empty");
+    }
+
+    public void searchUserAccountsTableForString(final String searchString) {
         fillInputField(inputSearch, searchString);
+    }
+
+    public int getCurrentUserAccountsTableRowCount() {
+        return getAllUserAccountsTableRows().size() - 2; // because of two header rows
+    }
+
+    private List<WebElement> getAllUserAccountsTableRows() {
+        return findElementsWithCss("[role = 'row']");
+    }
+
+    public String getTopAccountIdentifier() {
+        return getAllUserAccountsTableRows().get(2).getAttribute("id"); // first two rows represent table header
     }
 
     public void clearSearchField() {
         clearInputField(inputSearch);
-        inputSearch.sendKeys(Keys.RETURN);
     }
 
     public void setFirstName(final String firstName) {

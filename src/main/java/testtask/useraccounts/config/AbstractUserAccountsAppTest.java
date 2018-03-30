@@ -2,10 +2,8 @@ package testtask.useraccounts.config;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.openqa.selenium.WebElement;
 import testtask.useraccounts.page.UserAccountsPage;
 
-import java.util.List;
 import java.util.Random;
 
 /**
@@ -18,7 +16,7 @@ public abstract class AbstractUserAccountsAppTest extends AbstractSeleniumTest {
 
     @Before
     public final void setUpUserAccountsApp() {
-        // initialize page object to be tested
+        // initialize page object(s) to be tested
         userAccountsPage = new UserAccountsPage(getWebDriver());
     }
 
@@ -26,8 +24,8 @@ public abstract class AbstractUserAccountsAppTest extends AbstractSeleniumTest {
         getWebDriver().get(APPLICATION_URL);
     }
 
-    protected void searchTableForString(final String searchString) {
-        userAccountsPage.searchTableForString(searchString);
+    protected void searchUserAccountsTableForString(final String searchString) {
+        userAccountsPage.searchUserAccountsTableForString(searchString);
     }
 
     protected void createNewAccount(final String firstName, final String lastName, final String email, final String dateOfBirth) {
@@ -47,42 +45,9 @@ public abstract class AbstractUserAccountsAppTest extends AbstractSeleniumTest {
     }
 
     protected void deleteAccount(final String accountIdentifier) {
-        findElementWithCss(".delete [id = '" + accountIdentifier + "']").click();
+        userAccountsPage.findElementWithCss(".delete [id = '" + accountIdentifier + "']").click();
         getWebDriver().switchTo().alert().accept();
     }
-
-
-    /** ######################
-     *  ### HELPER METHODS ###
-     *  ######################*/
-
-    protected String createUniqueEmailAddress() {
-        String randomEmailAddress = null;
-        boolean notAlreadyInUse = false;
-        while(!notAlreadyInUse) {
-            randomEmailAddress = "frank" + new Random().nextInt(100) + "@grosse.com";
-            userAccountsPage.searchTableForString(randomEmailAddress);
-            notAlreadyInUse = isTableEmpty();
-        }
-        return randomEmailAddress;
-    }
-
-    private boolean isTableEmpty() {
-        return getAllTableRows().get(0).getText().equals("User Accounts Table Empty");
-    }
-
-    private List<WebElement> getAllTableRows() {
-        return findElementsWithCss("[role = 'row']");
-    }
-
-    private int getCurrentTableRowCount() {
-        return getAllTableRows().size() - 2; // because of two header rows
-    }
-
-    private String getAccountIdentifier() {
-        return getAllTableRows().get(2).getAttribute("id"); // first two rows represent table header
-    }
-
 
     /** #########################
      *  ### ASSERTION METHODS ###
@@ -96,22 +61,41 @@ public abstract class AbstractUserAccountsAppTest extends AbstractSeleniumTest {
 
     protected String verifyAccountDataIsPresentAndCorrect(final String expectedFirstName, final String expectedLastName, final String expectedEmail, final String expectedDateOfBirth) {
         userAccountsPage.clearSearchField();
-        Assert.assertTrue("Table seems to be empty but should not.", getCurrentTableRowCount() > 1);
+        Assert.assertTrue("Table seems to be empty but should not.", userAccountsPage.getCurrentUserAccountsTableRowCount() > 1);
 
-        searchTableForString(expectedEmail);
-        Assert.assertTrue("More than one occurrence of unique email address.", getCurrentTableRowCount() == 1);
-        final String accountIdentifier = getAccountIdentifier();
+        searchUserAccountsTableForString(expectedEmail);
+        Assert.assertTrue("More than one occurrence of unique email address.", userAccountsPage.getCurrentUserAccountsTableRowCount() == 1);
+        final String accountIdentifier = userAccountsPage.getTopAccountIdentifier();
 
-        Assert.assertEquals("Field 'firstName' does not match the expected value.", findElementById("firstName_" + accountIdentifier).getText(), expectedFirstName);
-        Assert.assertEquals("Field 'lastName' does not match the expected value.", findElementById("lastName_" + accountIdentifier).getText(), expectedLastName);
-        Assert.assertEquals("Field 'email' does not match the expected value.", findElementById("email_" + accountIdentifier).getText(), expectedEmail);
-        Assert.assertEquals("Field 'dateOfBirth' does not match the expected value.", findElementById("dateOfBirth_" + accountIdentifier).getText(), expectedDateOfBirth);
+        Assert.assertEquals("Field 'firstName' does not match the expected value.",
+                userAccountsPage.findElementById("firstName_" + accountIdentifier).getText(), expectedFirstName);
+        Assert.assertEquals("Field 'lastName' does not match the expected value.",
+                userAccountsPage.findElementById("lastName_" + accountIdentifier).getText(), expectedLastName);
+        Assert.assertEquals("Field 'email' does not match the expected value.",
+                userAccountsPage.findElementById("email_" + accountIdentifier).getText(), expectedEmail);
+        Assert.assertEquals("Field 'dateOfBirth' does not match the expected value.",
+                userAccountsPage.findElementById("dateOfBirth_" + accountIdentifier).getText(), expectedDateOfBirth);
 
         return accountIdentifier;
     }
 
     protected void verifyAccountIsNotPresent(final String emailAddress) {
-        searchTableForString(emailAddress);
-        Assert.assertTrue("There is an account present with email address '" + emailAddress + "' but should not.", isTableEmpty());
+        searchUserAccountsTableForString(emailAddress);
+        Assert.assertTrue("There is an account present with email address '" + emailAddress + "' but should not.", userAccountsPage.isUserAccountsTableEmpty());
+    }
+
+    /** ######################
+     *  ### HELPER METHODS ###
+     *  ######################*/
+
+    protected String createUniqueEmailAddress() {
+        String randomEmailAddress = null;
+        boolean notAlreadyInUse = false;
+        while(!notAlreadyInUse) {
+            randomEmailAddress = "frank" + new Random().nextInt(100) + "@grosse.com";
+            userAccountsPage.searchUserAccountsTableForString(randomEmailAddress);
+            notAlreadyInUse = userAccountsPage.isUserAccountsTableEmpty();
+        }
+        return randomEmailAddress;
     }
 }
