@@ -8,8 +8,6 @@ public class MinimalPageTest extends AbstractUserAccountsAppTest {
     @Test
     public void checkHappyPathOnUserAccountsPage() {
 
-        final String testAccountIdentifier;
-
         // given
         final String firstName = "Frank";
         final String lastName = "Grosse";
@@ -25,10 +23,10 @@ public class MinimalPageTest extends AbstractUserAccountsAppTest {
         // when
         createNewAccount(firstName, lastName, emailAddress, dateOfBirth);
         // then
-        testAccountIdentifier = verifyAccountDataIsPresentAndCorrect(firstName, lastName, emailAddress, dateOfBirth);
+        verifyAccountDataIsPresentAndCorrect(firstName, lastName, emailAddress, dateOfBirth);
 
         // when
-        deleteAccount(testAccountIdentifier);
+        deleteAllNewAccounts();
         // then
         verifyAccountIsNotPresent(emailAddress);
     }

@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import testtask.useraccounts.page.UserAccountsPage;
 
-import java.util.Random;
+import java.util.*;
 
 /**
  * Provides base functionality for testing User Accounts App.
@@ -13,6 +13,8 @@ public abstract class AbstractUserAccountsAppTest extends AbstractSeleniumTest {
 
     protected UserAccountsPage userAccountsPage;
     private static final String APPLICATION_URL = "http://borisborisov.bg/user-accounts/";
+
+    private List<String> accountsToBeDeleted = new ArrayList<>();
 
     @Before
     public final void setUpUserAccountsApp() {
@@ -44,9 +46,15 @@ public abstract class AbstractUserAccountsAppTest extends AbstractSeleniumTest {
         userAccountsPage.submitNewAccountData();
     }
 
-    protected void deleteAccount(final String accountIdentifier) {
+    private void deleteAccount(final String accountIdentifier) {
         userAccountsPage.findElementWithCss(".delete [id = '" + accountIdentifier + "']").click();
         getWebDriver().switchTo().alert().accept();
+    }
+
+    protected void deleteAllNewAccounts() {
+        for(String accountIdentifier : accountsToBeDeleted) {
+            deleteAccount(accountIdentifier);
+        }
     }
 
     /** #########################
@@ -59,7 +67,7 @@ public abstract class AbstractUserAccountsAppTest extends AbstractSeleniumTest {
         Assert.assertTrue("Page headline is not as expected!", userAccountsPage.getHeadline().equals("User Accounts Table"));
     }
 
-    protected String verifyAccountDataIsPresentAndCorrect(final String expectedFirstName, final String expectedLastName, final String expectedEmail, final String expectedDateOfBirth) {
+    protected void verifyAccountDataIsPresentAndCorrect(final String expectedFirstName, final String expectedLastName, final String expectedEmail, final String expectedDateOfBirth) {
         userAccountsPage.clearSearchField();
         Assert.assertTrue("Table seems to be empty but should not.", userAccountsPage.getCurrentUserAccountsTableRowCount() > 1);
 
@@ -76,7 +84,8 @@ public abstract class AbstractUserAccountsAppTest extends AbstractSeleniumTest {
         Assert.assertEquals("Field 'dateOfBirth' does not match the expected value.",
                 userAccountsPage.findElementById("dateOfBirth_" + accountIdentifier).getText(), expectedDateOfBirth);
 
-        return accountIdentifier;
+        accountsToBeDeleted.add(accountIdentifier);
+        userAccountsPage.clearSearchField();
     }
 
     protected void verifyAccountIsNotPresent(final String emailAddress) {
